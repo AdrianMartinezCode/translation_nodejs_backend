@@ -1,5 +1,6 @@
 const ApiError = require("../utils/ApiError");
 
+// TODO Make this constants as envvars
 const SENTENCES_COLLECTION_PATH = 'sentences';
 const PAGE_SIZE = 10;
 

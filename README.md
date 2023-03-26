@@ -29,6 +29,16 @@ We have created six views that you can check at the following links:
 
 At prod environment, you only need to change the domain:port to the necessary domain.
 
+### Execute the tests
+I have created some tests, but the backend isn't have the full coverage for e2e tests and integration tests due a lack of time,
+by the moment we can run the next tests:
+
+- Unit tests for the sentences.service: sentences.service.spec
+
+To execute the overall tests of the project:
+```npm run test```
+
+
 ## DB Initialization script
 This script is simple, read line by line avoiding to load the whole file into the memory,
 parse it as JSON, transform the format to the chosen, and use the creation sentence service
@@ -87,7 +97,7 @@ sum(
     r.cats.experience,
     r.cats.soft,
     r.cats.tech
-) should equals to 1
+) equals to 1
 ```
 We can rewrite this structure into the next format:
 
@@ -239,3 +249,8 @@ The two types of errors are:
 We have created a logger that is injected in some parts of the backend, but is ideal to be injected in more
 parts, but due a lack of time we only have used in the general error handler, the purpose of this logger
 is to abstract the implementation if we need to implement another log approach instead of the standard output.
+
+## Configuration
+The best practice to get configuration options along the whole project is injecting an object which contains the
+different values of the configuration, we can make it using the implemented dependency injection, but for the moment
+we did a wrong practice to do this, that is getting the configuration directly where will be used.
