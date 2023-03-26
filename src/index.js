@@ -34,5 +34,5 @@ app.use(handleUnexpectedError({logger}));
 
 const port = process.env.PORT || 3977;
 app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
+    logger.log(`Server is running on port ${port}`)
 })

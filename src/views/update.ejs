@@ -30,7 +30,6 @@
                 },
                 body: JSON.stringify(payload),
             });
-            console.log(response);
             if (!response.ok) {
                 const data = await response.json();
                 sentenceDetails.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;

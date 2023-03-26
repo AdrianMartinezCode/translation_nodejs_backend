@@ -9,9 +9,7 @@ const createSentence = async ({ sentence, db }) => {
 }
 
 const updateSentence = async ({ sentenceId, sentence, db }) => {
-    console.log(sentence);
     Object.keys(sentence).forEach(key => sentence[key] === undefined ? delete sentence[key] : {});
-    console.log(sentence);
     const sentenceDoc = await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).get();
     if (sentenceDoc.exists) {
         await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).update(sentence);
@@ -39,7 +37,6 @@ const getSentence = async ({ sentenceId, db }) => {
 }
 
 const listSentences = async ({ page, sortCriteria, category, db }) => {
-    console.log(`${page} ${sortCriteria} ${category}`)
     let itemsRef = db.collection(SENTENCES_COLLECTION_PATH);
     if (category) {
         itemsRef = itemsRef.where('category', '==', category);
