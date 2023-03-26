@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentences</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('sentence-filter-form');
+        const tableContainer = document.getElementById('sentences-table-container');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(form);
+            const category = formData.get('category');
+            const page = formData.get('page');
+            const sort = formData.get('sort');
+
+            const params = [];
+            if (category) params.push(`category=${category}`);
+            if (page) params.push(`page=${page}`);
+            if (sort) params.push(`sort=${sort}`);
+            const allParams = params.reduce((acc, v) => `${acc}&${v}`);
+            const response = await fetch(`/sentence/list?${allParams}`);
+            const data = await response.json();
+            const sentences = data;
+
+            if (response.ok) {
+                let tableHtml = `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Text</th>
+                    <th>Category</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+
+                sentences.forEach(sentence => {
+                    tableHtml += `
+                        <tr>
+                          <td>${sentence.id}</td>
+                          <td>${sentence.text}</td>
+                          <td>${sentence.category}</td>
+                        </tr>
+                      `;
+                });
+
+                tableHtml += `
+                </tbody>
+              </table>
+            `;
+
+                tableContainer.innerHTML = tableHtml;
+            } else {
+                tableContainer.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;
+            }
+
+
+        });
+    });
+
+</script>
+<div>
+    <a href="/views/main" class="button">Return to Main View</a>
+</div>
+<h1>Sentences</h1>
+
+<form id="sentence-filter-form">
+    <label for="category">Category:</label>
+    <select name="category" id="category">
+        <option value="">All</option>
+        <option value="responsibility">Responsibility</option>
+        <option value="benefit">Benefit</option>
+        <option value="none">None</option>
+        <option value="education">Education</option>
+        <option value="experience">Experience</option>
+        <option value="soft">Soft</option>
+        <option value="tech">Tech</option>
+    </select>
+
+    <label for="page">Page:</label>
+    <input type="number" name="page" id="page" min="1" value="<%= typeof page !== 'undefined' ? page : 1 %>">
+
+    <label for="sort">Sort:</label>
+    <select name="sort" id="sort">
+        <option value="ASC">ASC</option>
+        <option value="DESC">DESC</option>
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+<div id="sentences-table-container"></div>
+</body>
+</html>

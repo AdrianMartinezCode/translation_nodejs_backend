@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Sentence</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div>
+    <a href="/views/main" class="button">Back to Main</a>
+</div>
+<h1>Delete Sentence</h1>
+<form id="delete-form" method="POST">
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="hidden" name="id" id="sentence-id">
+    <p>Enter the ID of the sentence you want to delete:</p>
+    <input type="text" id="id-input" required>
+    <button type="submit">Delete</button>
+</form>
+<div id="error-message" style="color: red; display: none;"></div>
+<div id="sentence-details"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteForm = document.getElementById('delete-form');
+        const idInput = document.getElementById('id-input');
+        const sentenceId = document.getElementById('sentence-id');
+        const errorMessage = document.getElementById('error-message');
+        const sentenceDetails = document.getElementById('sentence-details');
+
+        deleteForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = idInput.value;
+            sentenceId.value = id;
+
+            const response = await fetch(`/sentence/single/${id}`, {method: 'DELETE'});
+
+            if (response.ok) {
+                errorMessage.style.display = 'none';
+                sentenceDetails.innerHTML = `
+                  <h2>Deleted ${id}</h2>
+                `;
+                sentenceDetails.style.display = 'block';
+            } else {
+                const data = await response.json();
+                errorMessage.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;
+                errorMessage.style.display = 'block';
+                sentenceDetails.innerHTML = '';
+            }
+        });
+    });
+
+</script>
+</body>
+</html>

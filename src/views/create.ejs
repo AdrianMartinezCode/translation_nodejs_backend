@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Sentence</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div>
+    <a href="/views/main" class="button">Back to Main</a>
+</div>
+<h1>Create Sentence</h1>
+<form id="create-form" method="POST">
+    <label for="content">Content:</label>
+    <input type="text" id="content" name="content" required>
+    <label for="category">Category:</label>
+    <select name="category" id="category" required>
+        <option value="responsibility">Responsibility</option>
+        <option value="benefit">Benefit</option>
+        <option value="none">None</option>
+        <option value="education">Education</option>
+        <option value="experience">Experience</option>
+        <option value="soft">Soft</option>
+        <option value="tech">Tech</option>
+    </select>
+    <button type="submit">Create</button>
+</form>
+<div id="error-message" style="color: red; display: none;"></div>
+<div id="success-message" style="color: green; display: none;"></div>
+
+<script>
+    const createForm = document.getElementById('create-form');
+    const errorMessage = document.getElementById('error-message');
+    const successMessage = document.getElementById('success-message');
+
+    createForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const text = document.getElementById('content').value;
+        const category = document.getElementById('category').value;
+
+        const response = await fetch('/sentence/single', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text, category }),
+        });
+
+        if (response.ok) {
+            errorMessage.style.display = 'none';
+            successMessage.innerText = 'Sentence created successfully!';
+            successMessage.style.display = 'block';
+        } else {
+            const data = await response.json();
+            errorMessage.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+    });
+</script>
+</body>
+</html>

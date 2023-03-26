@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Sentence</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sentenceDetails = document.getElementById('sentence-details');
+        document.getElementById('update-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const form = event.target;
+            const id = form.elements.id.value;
+            const text = form.elements.text.value;
+            const category = form.elements.category.value;
+
+            const payload = {
+                text,
+                category,
+            };
+
+            const response = await fetch(`/sentence/single/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+            console.log(response);
+            if (!response.ok) {
+                const data = await response.json();
+                sentenceDetails.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;
+            } else {
+                sentenceDetails.innerHTML = `<h2>Successful update</h2>`
+            }
+        });
+    });
+
+</script>
+<div>
+    <a href="/views/main" class="button">Return to Main View</a>
+</div>
+<h1>Update Sentence</h1>
+<form id="update-form">
+    <label for="id">ID:</label>
+    <input type="text" id="id" name="id" value="<%= typeof sentence !== 'undefined' ? sentence._id : '' %>" required>
+
+
+    <label for="text">Content (optional):</label>
+    <input type="text" id="text" name="text" value="<%= typeof sentence !== 'undefined' ? sentence.text : '' %>">
+
+    <label for="category">Category (optional):</label>
+    <select name="category" id="category">
+        <option value="">Choose a category</option>
+        <option value="responsibility">Responsibility</option>
+        <option value="benefit">Benefit</option>
+        <option value="none">None</option>
+        <option value="education">Education</option>
+        <option value="experience">Experience</option>
+        <option value="soft">Soft</option>
+        <option value="tech">Tech</option>
+    </select>
+
+    <button type="submit">Update Sentence</button>
+
+</form>
+<div id="sentence-details"></div>
+
+</body>
+</html>

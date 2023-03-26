@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentence</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchForm = document.getElementById('search-form');
+        const sentenceDetails = document.getElementById('sentence-details');
+
+        searchForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(searchForm);
+            const id = formData.get('id');
+
+            const response = await fetch(`/sentence/single/${id}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                sentenceDetails.innerHTML = `
+                    <h2>Id: ${data.id}</h2>
+                    <p>Content: ${data.text}</p>
+                    <p>Category: ${data.category}</p>
+                  `;
+            } else {
+                sentenceDetails.innerHTML = `<h2>Error</h2><p>Code: ${data.code}</p><p>${data.message}</p>`;
+            }
+        });
+    });
+
+</script>
+<div>
+    <a href="/views/main" class="button">Return to Main View</a>
+</div>
+<h1>Query Sentence by ID</h1>
+
+<form id="search-form">
+    <label for="id">Sentence ID:</label>
+    <input type="text" name="id" id="id" required>
+    <button type="submit">Search</button>
+</form>
+
+<div id="sentence-details"></div>
+
+</body>
+</html>
