@@ -1,82 +1,89 @@
-const ApiError = require("../utils/ApiError");
+const ApiError = require('@utils/ApiError');
+const {cleanUndefinedFields} = require('@utils/objects');
 
-// TODO Make this constants as envvars
-const SENTENCES_COLLECTION_PATH = 'sentences';
-const PAGE_SIZE = 10;
-
-const createSentence = async ({ sentence, db }) => {
-    const docRef = await db.collection(SENTENCES_COLLECTION_PATH).add(sentence);
-    return { id: docRef.id };
-}
-
-const updateSentence = async ({ sentenceId, sentence, db }) => {
-    Object.keys(sentence).forEach(key => sentence[key] === undefined ? delete sentence[key] : {});
-    const sentenceDoc = await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).get();
-    if (sentenceDoc.exists) {
-        await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).update(sentence);
-    } else {
-        throw new ApiError(404, "NOT_FOUND", `The sentenceId ${sentenceId} has not found.`);
-    }
-
-}
-
-const deleteSentence = async ({ sentenceId, db }) => {
-    const sentenceDoc = await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).get();
-    if (sentenceDoc.exists) {
-        await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).delete();
-    } else {
-        throw new ApiError(404, "NOT_FOUND", `The sentenceId ${sentenceId} has not found.`);
-    }
+const createSentence = async ({sentence, repository, logger}) => {
+  logger.info('Service creating sentence', sentence);
+  return await repository.insert({sentence});
 };
 
-const getSentence = async ({ sentenceId, db }) => {
-    const sentenceDoc = await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).get();
-    if (sentenceDoc.exists) {
-        return { id: sentenceDoc.id, ...sentenceDoc.data() };
-    }
-    throw new ApiError(404, "NOT_FOUND", `The sentenceId ${sentenceId} has not found.`);
-}
+const updateSentence = async ({sentenceId, sentence, repository, logger}) => {
+  logger.info('Service updating sentence', sentenceId, sentence);
+  sentence = cleanUndefinedFields(sentence);
+  const sentenceDoc = await repository.getById({sentenceId});
+  if (sentenceDoc !== null) {
+    await repository.updateById({sentenceId, sentence});
+  } else {
+    throw new ApiError(
+        404,
+        'NOT_FOUND',
+        `The sentenceId ${sentenceId} has not found.`,
+    );
+  }
+};
 
-const listSentences = async ({ page, sortCriteria, category, db }) => {
-    let itemsRef = db.collection(SENTENCES_COLLECTION_PATH);
-    if (category) {
-        itemsRef = itemsRef.where('category', '==', category);
-    }
-    // If the category is undefined, it doesn't matter the sort criteria, because all the results will have the same category.
-    // In addition, with this operation we prevent the error:
-    // order by clause cannot contain a field with an equality filter category
-    // This is a firestore limitation, that doesn't support the filterBy equality and orderBy at the same field.
-    if (category === undefined && sortCriteria) {
-        itemsRef = itemsRef.orderBy('category', sortCriteria === 'ASC' ? 'asc' : 'desc');
-    }
-    const offset = (page - 1) * PAGE_SIZE;
-    itemsRef = itemsRef.offset(offset).limit(PAGE_SIZE);
+const deleteSentence = async ({sentenceId, repository, logger}) => {
+  logger.info('Service delete sentence', sentenceId);
+  const sentenceDoc = await repository.getById({sentenceId});
+  if (sentenceDoc !== null) {
+    await repository.deleteById({sentenceId});
+  } else {
+    throw new ApiError(
+        404,
+        'NOT_FOUND',
+        `The sentenceId ${sentenceId} has not found.`,
+    );
+  }
+};
 
-    const snapshot = await itemsRef.get();
-    return snapshot._docs().map((doc) => ({ id: doc.id, ...doc.data() }));
-}
+const getSentence = async ({sentenceId, repository, logger}) => {
+  logger.info('Service get sentence', sentenceId);
+  const sentenceDoc = await repository.getById({sentenceId});
+  if (sentenceDoc !== null) {
+    return sentenceDoc;
+  }
+  throw new ApiError(
+      404,
+      'NOT_FOUND',
+      `The sentenceId ${sentenceId} has not found.`,
+  );
+};
 
-const translateSentence = async ({ sentenceId, db, translator }) => {
-    const sentenceDoc = await db.collection(SENTENCES_COLLECTION_PATH).doc(sentenceId).get();
-    if (!sentenceDoc.exists) {
-        throw new ApiError(404, "NOT_FOUND", `The sentenceId ${sentenceId} has not found.`);
-    }
-    const sentence = sentenceDoc.data();
-    const textToTranslate = sentence.text;
+const listSentences =
+    async ({page, sortCriteria, category, repository, logger}) => {
+      logger.info(
+          `Service list sentences page=${page},sortCriteria=${sortCriteria},category=${category}`,
+      );
+      return await repository.list({page, sortCriteria, category});
+    };
 
-    const translatedText = await translator(textToTranslate);
+const translateSentence =
+    async ({sentenceId, repository, translator, logger}) => {
+      logger.info('Service translate sentence', sentenceId);
+      const sentenceDoc = await repository.getById({sentenceId});
+      if (sentenceDoc === null) {
+        throw new ApiError(
+            404,
+            'NOT_FOUND',
+            `The sentenceId ${sentenceId} has not found.`,
+        );
+      }
+      const textToTranslate = sentenceDoc.text;
 
-    return {id: sentenceDoc.id, ...sentence, translation: translatedText};
-}
+      const translatedText = await translator({sentence: textToTranslate});
+
+      return {...sentenceDoc, translation: translatedText};
+    };
 
 
-const sentencesService = ({ db, translator }) => ({
-    create: ({ sentence }) => createSentence({ sentence, db }),
-    update: ({ sentenceId, sentence }) => updateSentence({ sentenceId, sentence, db }),
-    delete: ({ sentenceId }) => deleteSentence({ sentenceId, db }),
-    get: ({ sentenceId }) => getSentence({ sentenceId, db }),
-    list: (params) => listSentences({ ...params, db }),
-    translate: ({ sentenceId }) => translateSentence({ sentenceId, db, translator })
+const sentencesService = ({repository, translator, logger}) => ({
+  create: ({sentence}) => createSentence({sentence, repository, logger}),
+  update: ({sentenceId, sentence}) =>
+    updateSentence({sentenceId, sentence, repository, logger}),
+  delete: ({sentenceId}) => deleteSentence({sentenceId, repository, logger}),
+  get: ({sentenceId}) => getSentence({sentenceId, repository, logger}),
+  list: (params) => listSentences({...params, repository, logger}),
+  translate: ({sentenceId}) =>
+    translateSentence({sentenceId, repository, translator, logger}),
 });
 
 module.exports = sentencesService;

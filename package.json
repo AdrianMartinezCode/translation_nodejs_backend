@@ -18,12 +18,32 @@
     "express-async-handler": "^1.2.0",
     "firebase-admin": "^11.5.0",
     "jsonwebtoken": "^9.0.0",
-    "node-fetch": "^3.3.1"
+    "module-alias": "^2.2.2",
+    "node-fetch": "^3.3.1",
+    "sinon-chai": "^3.7.0"
   },
   "devDependencies": {
     "chai": "^4.3.7",
+    "eslint": "^8.38.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-node": "^4.1.0",
+    "eslint-plugin-node": "^11.1.0",
     "mocha": "^10.2.0",
     "sinon": "^15.0.2",
     "supertest": "^6.3.3"
+  },
+  "_moduleAliases": {
+    "@root": ".",
+    "@src": "./src",
+    "@config": "./src/config",
+    "@controllers": "./src/controllers",
+    "@database": "./src/database",
+    "@middleware": "./src/middleware",
+    "@routes": "./src/routes",
+    "@services": "./src/services",
+    "@thirdparty": "./src/thirdparty",
+    "@utils": "./src/utils",
+    "@resources": "./resources",
+    "@repository": "./src/repository"
   }
 }

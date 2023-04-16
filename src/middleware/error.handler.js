@@ -1,27 +1,27 @@
-const ApiError = require("../utils/ApiError");
+const ApiError = require('@utils/ApiError');
 
+const handleApiError = ({logger}) => (err, req, res, next) => {
+  if (err instanceof ApiError) {
+    logger.info('Api Error catched', err);
+    return res.status(err.statusCode).json({
+      code: err.code,
+      message: err.message,
+    });
+  }
 
-const handleApiError = (err, req, res, next) => {
-    if (err instanceof ApiError) {
-        return res.status(err.statusCode).json({
-            code: err.code,
-            message: err.message,
-        });
-    }
-
-    next(err);
+  next(err);
 };
 
-const handleUnexpectedError = ({ logger }) => (err, req, res, next) => {
-    logger.error('Unexpected error:', err);
+const handleUnexpectedError = ({logger}) => (err, req, res, next) => {
+  logger.error('Unexpected error:', err);
 
-    res.status(500).json({
-        code: "000",
-        message: 'An unexpected error occurred',
-    });
+  res.status(500).json({
+    code: '000',
+    message: 'An unexpected error occurred',
+  });
 };
 
 module.exports = {
-    handleApiError,
-    handleUnexpectedError,
+  handleApiError,
+  handleUnexpectedError,
 };
