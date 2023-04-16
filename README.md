@@ -1,59 +1,206 @@
+ ## Introduction
 
-## First steps
-To run anything in local, ensure that you have the next files into the resources folder,
-by security reasons I didn't put these files into the github repository:
+ This README provides a comprehensive guide for setting up and using the backend project. 
+ It covers the necessary steps, such as required files, environment variables, running the server, 
+ API documentation, testing, and more.
 
-- sentences.jsonl.txt (in case that you'll execute the initialization script)
-- service-api-key.json (the secret key from the firebase)
-- yandex-api-key.txt (the api key from the yandex)
+ ## Table of Contents
 
-If we want to deploy the backend we should define the next envvars:
-- FIREBASE_SERVICE_ACCOUNT_KEY : the stringified firebase secret key
-- YANDEX_API_KEY : the api key from the yandex
-- PORT : the port that will be used to make the requests
+ 1. Prerequisites
+ 2. Setup and Configuration
+ 3. Running the Server
+ 4. API Documentation
+ 5. Testing
+ 6. Database Initialization
+ 7. Data Aggregation
+ 8. JSON Data Transformation
+ 9. Error Handling
+ 10. Logging
 
-### Run the nodejs API server
-We can run the server in two approaches:
-```node ./src/index.js```<br>
-Or via npm scripts:
-```npm run start```
+ ## 1. Prerequisites
 
-### Views path
-We have created six views that you can check at the following links:
-- http://localhost:3977/views/main  <-- the root view, you can access to the other views
-- http://localhost:3977/views/create
-- http://localhost:3977/views/update
-- http://localhost:3977/views/delete
-- http://localhost:3977/views/list
-- http://localhost:3977/views/query
+ Before running the project locally, make sure you have the following files in the resources folder, 
+ as they are not included in the GitHub repository due to security reasons:
 
-At prod environment, you only need to change the domain:port to the necessary domain.
+ - sentences.jsonl.txt: Required if you plan to execute the initialization script
+ - service-api-key.json: The secret key for Firebase
+ - yandex-api-key.txt: The API key for Yandex
 
-### Execute the tests
-I have created some tests, but the backend isn't have the full coverage for e2e tests and integration tests due a lack of time,
-by the moment we can run the next tests:
+ When deploying the backend, ensure the following environment variables are set:
+
+ - FIREBASE_SERVICE_ACCOUNT_KEY: The stringified Firebase secret key
+ - YANDEX_API_KEY: The Yandex API key
+ - PORT: The port used for requests
+
+ ## 2. Setup and Configuration
+
+Start downloading the nodejs and npm and installing these, once you have both applications type on the terminal from the root source project:
+```npm install```
+
+ ## 3. Running the Server
+
+ To run the Node.js API server, you can use one of the following methods:
+
+``` node ./src/index.js```<br>
+ Or via npm scripts:
+ ```npm run start```
+
+ Once the server is running, you can access the following views:
+ - http://localhost:3977/views/main  <-- the root view, you can access to the other views
+ - http://localhost:3977/views/create
+ - http://localhost:3977/views/update
+ - http://localhost:3977/views/delete
+ - http://localhost:3977/views/list
+ - http://localhost:3977/views/query
+
+ In a production environment, replace localhost:3977 with the appropriate domain and port.
+
+ ## 4. API Documentation
+
+ The API provides five endpoints to manage sentence data. Replace localhost:3977 with 
+ the appropriate address for your environment.
+
+### 4.1. Create a Sentence (POST /sentence/single)
+
+ This endpoint is used to create a single sentence:
+
+```
+curl --location 'http://localhost:3977/sentence/single' \
+--header 'Content-Type: application/json' \
+--data '{
+"text": "Ich mache einen Programmiertest",
+"category": "education"
+}'
+```
+The return body will include the ID of the created sentence:
+```
+{
+    "id": "cTY76mbps9lYDsWcGNJN"
+}
+```
+
+### 4.2. Update a Sentence (PUT /sentence/single/:id)
+
+ This endpoint is used to modify the text and category fields of a sentence with the given ID:
+```
+curl --location --request PUT 'http://localhost:3977/sentence/single/cTY76mbps9lYDsWcGNJN' \
+--header 'Content-Type: application/json' \
+--data '{
+    "text": "Ich ändere einen Satz",
+    "category": "none"
+}'
+```
+ No response body is returned for this endpoint.
+
+  ### 4.3. Delete a Sentence (DELETE /sentence/single/:id)
+ 
+  This endpoint deletes a sentence with the given ID:
+ ```
+curl --location --request DELETE 'http://localhost:3977/sentence/single/cTY76mbps9lYDsWcGNJN'
+```
+No response body is returned for this endpoint.
+
+### 4.4. Retrieve a Sentence (GET /sentence/single/:id)
+This endpoint retrieves a sentence with the given ID:
+
+```
+curl --location 'http://localhost:3977/sentence/single/7o1YecFX8YGEp2iqWuGl'
+```
+The response body will include the sentence details:
+```
+{
+    "id": "7o1YecFX8YGEp2iqWuGl",
+    "category": "soft",
+    "text": "Ich frage das Backend nach einem Satz ab"
+}
+```
+
+### 4.5. List Sentences (GET /sentence/list?category=none&page=3&sort=ASC)
+ This endpoint retrieves a list of sentences based on the provided parameters:
+ - category: One of the possible categories
+ - page: The page corresponding to the defined criteria
+ - sort: Sort by category in ascending (ASC) or descending (DESC) order
+
+ Example query:
+
+```
+curl --location 'http://localhost:3977/sentence/list?category=none&page=3&sort=ASC'
+```
+Sample response:
+```
+[
+    {
+        "id": "pvgLyejuIoEByVuQasxb",
+        "text": "bund.de Navigation anzeigen Filter anzeigen Navigation Haupt-Navigations-MenÃ¼ Stellenangebote Ausschreibungen BehÃ¶rden Leistungen Meta-Navigation LEICHTE SPRACHE GEBÃ„RDENSPRACHE IMPRESSUM / DATENSCHUTZ ÃœBER BUND.DE ENGLISH",
+        "category": "none"
+    },
+    {
+        "id": "q3sazRjA08rabAoe6U9L",
+        "text": "Hilfe beim Einrichten von Hardware & Accounts",
+        "category": "none"
+    },
+    {
+        "id": "scwwI8L7PWvl1GRMyikp",
+        "text": "Referent Personalentwicklung (m/w)",
+        "category": "none"
+    },
+    {
+        "id": "y76v5eC502XgjY41Um6T",
+        "text": "Braunschweig",
+        "category": "none"
+    },
+    {
+        "id": "yoNawAooVFTy8lUDkMx3",
+        "text": "Wir suchen fÃ¼r unsere Tochtergesellschaft Schmidhauser AG am Standort Romanshorn in der Schweiz einen.",
+        "category": "none"
+    }
+]
+```
+
+ ### 4.6. Translate a Sentence (GET /sentence/translate/:id)
+
+ This endpoint translates a sentence with the given ID:
+```
+curl --location 'http://localhost:3977/sentence/translate/q3sazRjA08rabAoe6U9L'
+```
+One possible response can be:
+```
+{
+    "id": "q3sazRjA08rabAoe6U9L",
+    "text": "Hilfe beim Einrichten von Hardware & Accounts",
+    "category": "none",
+    "translation": "Help with setting up hardware "
+}
+```
+
+
+## 5. Testing
+We have created some tests, but the backend isn't have the full coverage for e2e tests and integration tests by the moment,
+we can run the next tests:
 
 - Unit tests for the sentences.service: sentences.service.spec
+- Unit tests for the sentence.repository: sentence.repository.spec
 
 To execute the overall tests of the project:
 ```npm run test```
 
 
-## DB Initialization script
-This script is simple, read line by line avoiding to load the whole file into the memory,
-parse it as JSON, transform the format to the chosen, and use the creation sentence service
+## 6. Database Initialization
+This script takes the sentences.jsonl.txt file to save these in the database.
+The script is simple, read line by line avoiding to load the whole file into the memory,
+parse it as JSON, transform the format to the chosen and use the creation sentence service
 to store it.
 
 To execute the script we type in the console:
 ```node ./scripts/dbInitialization/index.js```
 
-## Aggregation script
+## 7. Data Aggregation
 This script is simple as well, we use the list service to get the sentences by pages,
-for each sentence of each page, we split by the space character, we normalized every token, 
+for each sentence of each page, we split by the space character, we normalized every token,
 and we used a dictionary to classify each token with their current occurrences, we have used a dictionary because
 their access cost is O(1).
 
-Once we filled the dictionary with all the word occurrences on our database, 
+Once we filled the dictionary with all the word occurrences on our database,
 we sort the keys based on their occurrence value, we take the first N words,
 and we print it.
 
@@ -63,9 +210,8 @@ To execute the script we type in the console:
 We can configure the top N words at the third argument.
 
 
-
-## Jobs JSON transformation
-The base json structure given has the next format:
+## 8. JSON Data Transformation
+The given base json structure has the next format:
 ```
 {
     text: "Sie sind offen, ...",
@@ -119,138 +265,23 @@ With this approach we can define an index to optimize the query above the
 category field and saving space in the database.
 
 
-## API Documentation
-We have five endpoints to manage the required API (change the localhost address to use it in other environment):
+ ## 9. Error Handling
 
-### POST sentence/single
-This endpoint is used to create a single sentence:
-```
-curl --location 'http://localhost:3977/sentence/single' \
---header 'Content-Type: application/json' \
---data '{
-"text": "Ich mache einen Programmiertest",
-"category": "education"
-}'
-```
-The return body will be:
-```
-{
-    "id": "cTY76mbps9lYDsWcGNJN"
-}
-```
-Indicating the sentence ID if it was necessary to use it.
-
-### PUT sentence/single/:id
-We can modify the text and category fields from a given sentence:
-
-```
-curl --location --request PUT 'http://localhost:3977/sentence/single/cTY76mbps9lYDsWcGNJN' \
---header 'Content-Type: application/json' \
---data '{
-    "text": "Ich ändere einen Satz",
-    "category": "none"
-}'
-```
-
-No body return in this endpoint.
-
-### DELETE sentence/single/:id
-This endpoint deletes the sentence by the given id.
-```
-curl --location --request DELETE 'http://localhost:3977/sentence/single/cTY76mbps9lYDsWcGNJN'
-```
-No body return in this endpoint.
-
-### GET sentence/single/:id
-This endpoint query for a sentence with the given id:
-```
-curl --location 'http://localhost:3977/sentence/single/7o1YecFX8YGEp2iqWuGl'
-```
-And the response body is:
-```
-{
-    "id": "7o1YecFX8YGEp2iqWuGl",
-    "category": "soft",
-    "text": "Ich frage das Backend nach einem Satz ab"
-}
-```
-
-### GET sentence/list?category=none&page=3&sort=ASC
-This endpoint query for a list of a sentences given the parameters:
-- category: can be one of the possible categories
-- page: the page corresponding to the criteria defined
-- sort: ASC|DESC by category
-
-An example of a query can be:
-```
-curl --location 'http://localhost:3977/sentence/list?category=none&page=3&sort=ASC'
-```
-And the response:
-```
-[
-    {
-        "id": "pvgLyejuIoEByVuQasxb",
-        "text": "bund.de Navigation anzeigen Filter anzeigen Navigation Haupt-Navigations-MenÃ¼ Stellenangebote Ausschreibungen BehÃ¶rden Leistungen Meta-Navigation LEICHTE SPRACHE GEBÃ„RDENSPRACHE IMPRESSUM / DATENSCHUTZ ÃœBER BUND.DE ENGLISH",
-        "category": "none"
-    },
-    {
-        "id": "q3sazRjA08rabAoe6U9L",
-        "text": "Hilfe beim Einrichten von Hardware & Accounts",
-        "category": "none"
-    },
-    {
-        "id": "scwwI8L7PWvl1GRMyikp",
-        "text": "Referent Personalentwicklung (m/w)",
-        "category": "none"
-    },
-    {
-        "id": "y76v5eC502XgjY41Um6T",
-        "text": "Braunschweig",
-        "category": "none"
-    },
-    {
-        "id": "yoNawAooVFTy8lUDkMx3",
-        "text": "Wir suchen fÃ¼r unsere Tochtergesellschaft Schmidhauser AG am Standort Romanshorn in der Schweiz einen.",
-        "category": "none"
-    }
-]
-```
-
-### GET sentence/translate/:id
-This endpoint translates a sentence given an id:
-```
-curl --location 'http://localhost:3977/sentence/translate/q3sazRjA08rabAoe6U9L'
-```
-And one possible response can be:
-```
-{
-    "id": "q3sazRjA08rabAoe6U9L",
-    "text": "Hilfe beim Einrichten von Hardware & Accounts",
-    "category": "none",
-    "translation": "Help with setting up hardware "
-}
-```
-
-## Error handling
-I created a middleware to handle two types of errors, but returning with the same body structure:
-
+ A middleware has been created to handle two types of errors, both returning the same body structure:
 ```
 {
     "code": "NOT_FOUND",
     "message": "The sentenceId cTY76mbps9lYDsWcGNJ has not found."
 }
 ```
-The two types of errors are:
-- ApiError , that is known as an error that will be showed to the user, and informing of anything wrong, for example an incorrect parameter or if the queried sentence doesn't exists.
-- Generic error, that can be thrown in anywhere of the backend, this will be logged on our error output and we will show a standard generic error to the user.
-
-
-## Logger
-We have created a logger that is injected in some parts of the backend, but is ideal to be injected in more
-parts, but due a lack of time we only have used in the general error handler, the purpose of this logger
-is to abstract the implementation if we need to implement another log approach instead of the standard output.
-
-## Configuration
-The best practice to get configuration options along the whole project is injecting an object which contains the
-different values of the configuration, we can make it using the implemented dependency injection, but for the moment
-we did a wrong practice to do this, that is getting the configuration directly where will be used.
+  The two types of errors are:
+  - ApiError: Known errors that will be shown to the user, informing them of any issues, 
+such as incorrect parameters or if the queried sentence doesn't exist.
+  - Generic error: Can be thrown anywhere in the backend. This will be logged on our error output, 
+and a standard generic error will be shown to the user.
+ 
+  ## 10. Logging
+ 
+  A logger has been created and injected into some parts of the backend and is used to log
+some actions on different layers. This approach makes us able to change in only in one file
+the standard output to anywhere.
